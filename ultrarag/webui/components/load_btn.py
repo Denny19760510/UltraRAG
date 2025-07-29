@@ -4,7 +4,11 @@ from pathlib import Path
 home_path = Path().resolve()
 sys.path.append(home_path.as_posix())
 from ultrarag.modules.embedding import EmbeddingClient, load_model, OpenAIEmbedding
-from ultrarag.modules.llm import OpenaiLLM, HuggingfaceClient, HuggingFaceServer, VllmServer
+from ultrarag.modules.llm import OpenaiLLM, HuggingfaceClient, HuggingFaceServer
+try:
+    from ultrarag.modules.llm import VllmServer
+except ImportError:
+    VllmServer = None
 from ultrarag.modules.reranker import RerankerClient, RerankerServer
 from ultrarag.webui.components.loading import loading
 from loguru import logger
@@ -53,7 +57,10 @@ def load_llm_model(base_url, api_key, model_name, model_path, device=None, **arg
         # NOTE: MiniCPMV just running well in HuggingFaceServer
         if "MiniCPMV" in config.architectures:
             return HuggingFaceServer(model_path=model_path, device=device)
-        return VllmServer(base_url=model_path, device=device)
+        if VllmServer is not None:
+            return VllmServer(base_url=model_path, device=device)
+        else:
+            return HuggingFaceServer(model_path=model_path, device=device)
     else:
         return OpenaiLLM(base_url=base_url, api_key=api_key, model=model_name)
 

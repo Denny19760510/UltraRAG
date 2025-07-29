@@ -1,6 +1,9 @@
 [server]
 port = 8843
 
+[browser]
+gatherUsageStats = false
+
 [logging]
 level = "debug"
 
